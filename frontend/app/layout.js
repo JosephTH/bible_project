@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import localFont from 'next/font/local';
 import './globals.css';
 

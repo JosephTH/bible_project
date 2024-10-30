@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // components/DisplayOptions.js
 'use client';
 

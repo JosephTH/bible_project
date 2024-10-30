@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 // components/SearchBar.js
 'use client';
 
