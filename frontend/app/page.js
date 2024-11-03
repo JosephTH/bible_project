@@ -13,7 +13,7 @@ export default function Home() {
 
   const handleSearch = async (query) => {
     try {
-      const response = await axios.get('http://localhost:5001/search', {
+      const response = await axios.get('/api/search', {
         params: { query },
       });
       setVerses(response.data);

@@ -1,14 +1,14 @@
 export function groupVerses(verses) {
   // Sort verses by book, chapter, and verse number
-  const sortedVerses = [...verses].sort((a, b) => {
-    if (a.book !== b.book) return a.book.localeCompare(b.book);
-    if (a.chapter !== b.chapter) return a.chapter - b.chapter;
-    return a.verse - b.verse;
-  });
+  //const sortedVerses = [...verses].sort((a, b) => {
+  //  if (a.book !== b.book) return a.book.localeCompare(b.book);
+  //  if (a.chapter !== b.chapter) return a.chapter - b.chapter;
+  //  return a.verse - b.verse;
+  //});
 
   const grouped = [];
 
-  sortedVerses.forEach((verse) => {
+  verses.forEach((verse) => {
     const lastGroup = grouped[grouped.length - 1];
 
     if (

@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 export default function SearchBar({ onSearch }) {
   const [input, setInput] = useState('');
-  const maxLength = 50;
+  const maxLength = 200;
 
   const handleSubmit = (e) => {
     e.preventDefault();
