@@ -69,39 +69,124 @@ const bookMap = {
 
 exports.parseQuery = (query) => {
   const searchParams = [];
-  const regex = /([1-3]?\s?[가-힣]+)\s+(\d+):([\d\-,\s]+)/g;
-  let match;
-  console.log(query);
+  let currentBook = null;
+  let currentChapter = null;
 
-  while ((match = regex.exec(query)) !== null) {
-    const bookAbbr = match[1].replace(/\s/g, '');
-    const book = bookMap[bookAbbr] || bookAbbr;
-    const chapter = parseInt(match[2], 10);
-    const versesPart = match[3];
+  // Split the query by commas, as commas separate tokens
+  const tokens = query.split(',');
 
-    const verses = parseVerses(versesPart);
+  for (const token of tokens) {
+    const trimmedToken = token.trim();
 
-    searchParams.push({ book, chapter, verses });
+    // Regular expressions for different patterns
+    // Pattern A: BookChapter:Verses (e.g., "Gal5:20", "Gal 5:20")
+    const patternA =
+      /^(?<bookChapter>[1-3]?\s*[가-힣]+\s*\d+)\s*:\s*(?<verses>.+)$/;
+    // Pattern B: Chapter:Verses (e.g., "4:20")
+    const patternB = /^(?<chapter>\d+)\s*:\s*(?<verses>.+)$/;
+    // Pattern C: Verses only (e.g., "21,22,24")
+    const patternC = /^(?<verses>.+)$/;
+
+    let match;
+
+    // Try to match Pattern A
+    if ((match = trimmedToken.match(patternA))) {
+      const bookChapterStr = match.groups.bookChapter.replace(/\s/g, '');
+      const versesPart = match.groups.verses;
+
+      const { book, chapter } = extractBookAndChapter(bookChapterStr);
+
+      currentBook = book;
+      currentChapter = chapter;
+
+      searchParams.push({
+        book: currentBook,
+        chapter: currentChapter,
+        verses: parseVerses(versesPart),
+      });
+
+      continue;
+    }
+
+    // Try to match Pattern B
+    if ((match = trimmedToken.match(patternB))) {
+      if (!currentBook) {
+        throw new Error('Chapter specified without a book');
+      }
+
+      currentChapter = parseInt(match.groups.chapter, 10);
+      const versesPart = match.groups.verses;
+
+      searchParams.push({
+        book: currentBook,
+        chapter: currentChapter,
+        verses: parseVerses(versesPart),
+      });
+
+      continue;
+    }
+
+    // Try to match Pattern C
+    if ((match = trimmedToken.match(patternC))) {
+      if (!currentBook || !currentChapter) {
+        throw new Error('Verses specified without a book and chapter');
+      }
+
+      const versesPart = match.groups.verses;
+
+      searchParams.push({
+        book: currentBook,
+        chapter: currentChapter,
+        verses: parseVerses(versesPart),
+      });
+
+      continue;
+    }
+
+    // If none of the patterns match, throw an error or skip
+    throw new Error(`Unable to parse token: '${trimmedToken}'`);
   }
-  console.log(searchParams);
 
   return searchParams;
 };
 
+function extractBookAndChapter(bookChapterStr) {
+  // Remove all spaces from the string
+  const str = bookChapterStr.replace(/\s/g, '');
+  const match = str.match(/^([1-3]?[가-힣]+)(\d+)$/);
+
+  if (match) {
+    const bookAbbr = match[1];
+    const book = bookMap[bookAbbr] || bookAbbr;
+    const chapter = parseInt(match[2], 10);
+    return { book, chapter };
+  } else {
+    throw new Error(
+      `Unable to parse book and chapter from '${bookChapterStr}'`
+    );
+  }
+}
+
 function parseVerses(versesStr) {
   const verses = [];
   const parts = versesStr.split(',');
-  console.log(versesStr);
-  console.log(parts);
 
   for (const part of parts) {
     if (part.includes('-')) {
-      const [start, end] = part.trim().split('-').map(Number);
+      const [startStr, endStr] = part
+        .trim()
+        .split('-')
+        .map((s) => s.trim());
+      const start = parseInt(startStr, 10);
+      const end = parseInt(endStr, 10);
+      if (isNaN(start) || isNaN(end)) {
+        continue;
+      }
       for (let i = start; i <= end; i++) {
         verses.push(i);
       }
     } else {
-      verse = parseInt(part.trim(), 10);
+      const verse = parseInt(part.trim(), 10);
       if (isNaN(verse)) {
         continue;
       }

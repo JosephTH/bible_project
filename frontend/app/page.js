@@ -5,7 +5,7 @@ import SearchBar from '../components/SearchBar';
 import DisplayOptions from '../components/DisplayOptions';
 import VersesWithBookChapter from '@/components/VersesWithBookChapter';
 import TextOnlyVerses from '@/components/TextOnlyVerses';
-import axios from 'axios';
+import api from '../utils/api';
 
 export default function Home() {
   const [verses, setVerses] = useState([]);
@@ -13,7 +13,7 @@ export default function Home() {
 
   const handleSearch = async (query) => {
     try {
-      const response = await axios.get('/api/search', {
+      const response = await api.get('/api/search', {
         params: { query },
       });
       setVerses(response.data);
